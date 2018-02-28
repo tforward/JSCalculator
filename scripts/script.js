@@ -3,22 +3,13 @@
 const myApp = Object.create(null);
 
 // ======================================================================
-
-myApp.main = function main(){
-  console.log("Main loaded")
-  
-}
-// ======================================================================
-// NOTE
-// ======================================================================
- 
-
-// ======================================================================
-// Onload fuction alt. to JQuery ready method.
+// App
 // ======================================================================
 
-myApp.initApplication = function(){
-  console.log("App Loaded.\n");
+myApp.main = function main() {
+};
+
+myApp.initApplication = function init() {
   myApp.main();
 };
 
@@ -32,3 +23,6 @@ document.onreadystatechange = function onreadystatechange() {
 };
 
 // ======================================================================
+
+// NEED CONTEXT TO FILL
+/// https://stackoverflow.com/questions/29996973/flexbox-single-column-to-stacked-multi-column

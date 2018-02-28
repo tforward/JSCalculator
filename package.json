@@ -1,0 +1,28 @@
+{
+  "name": "jscalculator",
+  "version": "1.0.0",
+  "description": "JavaScript Calculator",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tforward/JSCalculator.git"
+  },
+  "keywords": [
+    "js",
+    "calculator",
+    "oolo"
+  ],
+  "author": "tforward",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tforward/JSCalculator/issues"
+  },
+  "homepage": "https://github.com/tforward/JSCalculator#readme",
+  "devDependencies": {
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.9.0"
+  }
+}
