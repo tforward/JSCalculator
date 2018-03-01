@@ -24,5 +24,5 @@ document.onreadystatechange = function onreadystatechange() {
 
 // ======================================================================
 
-// NEED CONTEXT TO FILL
-/// https://stackoverflow.com/questions/29996973/flexbox-single-column-to-stacked-multi-column
+
+/// https://philipwalton.github.io/solved-by-flexbox/demos/grids/
