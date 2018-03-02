@@ -1,5 +1,10 @@
 /* CSS */
 
+@font-face {
+    font-family: abel;
+    src: url(https://fonts.googleapis.com/css?family=Abel);
+}
+
 html {
     box-sizing: border-box;
   }
@@ -60,9 +65,39 @@ html {
 #mainBtns {
     background-color: lightgray;
     flex: 3 1;
+    height: 90%;
+
 }
 
+/* Digit Buttons */
 
+.btnRow {
+    display: flex;
+    flex-direction: row;
+}
+
+.btnDigit {
+    flex: 1 1 auto;
+    background-color: lightgrey;
+    color: black;
+    text-decoration: none;
+    text-align: center;
+    margin: 1% 1%;
+    cursor: pointer;
+    min-width: 2em;
+    border-radius: 10%;
+    -webkit-transition-duration: 0.2s; /* Safari */
+    transition-duration: 0.2s;
+    outline: 0;
+    border: none;
+    font-size: 4vh;
+    font-family: abel;
+    box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+}
+
+.btnDigit:active {
+    box-shadow: 0 0.01px 0.01px 0 rgba(0,0,0,0.24), 0 0.01px 0.01px 0 rgba(0,0,0,0.19);
+}
 
 .center {
     justify-content: center; /* center items horizontally, in this case */
