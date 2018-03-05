@@ -8,12 +8,51 @@ const myApp = Object.create(null);
 
 myApp.main = function main() {
   const sandbox = EventDelegator();
-  const div1 = document.getElementById("eventSandbox");
+  const eventSandbox = document.getElementById("calc");
+  sandbox.init(eventSandbox, "click", null);
+  sandbox.add(eventController);
 
-  // Create a event Observer
-  const observers = EventObservers();
-  observers.init();
+  myApp.currentValue = "0";
 };
+
+function eventController(args, e) {
+  const value = getTargetProp(e, ["BUTTON"], "value");
+
+  const num = parseInt(value, 10);
+
+  if (value === "C") {
+    clearCalc();
+  }
+
+  if (Number.isInteger(num)) {
+    determineValue(value);
+  }
+
+  // Stop the event from going further up the DOM
+  e.stopPropagation();
+}
+
+function determineValue(value) {
+  if (value !== "undefined") {
+    if (myApp.currentValue !== "0") {
+      const newValue = myApp.currentValue + value;
+      myApp.currentValue = newValue;
+    } else {
+      myApp.currentValue = value;
+    }
+    calcDisplay(myApp.currentValue);
+  }
+}
+
+function clearCalc() {
+  calcDisplay("0");
+  myApp.currentValue = "0";
+}
+
+function calcDisplay(valve) {
+  const display = document.getElementById("displayNums");
+  display.innerText = valve;
+}
 
 function EventDelegator() {
   const Event = Object.create(createEvent());
@@ -24,30 +63,6 @@ function EventDelegator() {
     this.addListener(func, options);
   };
   return Event;
-}
-
-// TODO https://eslint.org/docs/rules/object-shorthand
-function observerDelegator() {
-  const Observer = {
-    init: function(btnId, elem) {
-        this.id = elem.id;
-        this.elem = elem;
-        this.btnId = btnId;
-    },
-    props: function() {
-      this.count = 0;
-      this.args = null;
-    },
-    add: function(num , data) {
-        this.count += 1
-        this.elem.textContent = this.count;
-    },
-    clear: function() {
-      this.elem.textContent = 0;
-      this.count = 0;
-    },
-  }
-  return Observer;
 }
 
 function createEvent() {
@@ -74,64 +89,12 @@ function createEvent() {
   return CreateEvent;
 }
 
-function EventObservers() {
-  // Delegator
-  const Event = Object.create(null);
-  Event.init = function init() {
-    this.observers = Object.create(null);
-  };
-  Event.subscribe = function subscribe(observer) {
-    this.observers[observer.id] = observer;
-  };
-  Event.unsubscribe = function unsubscribe(observer) {
-    const i = this.observers.indexOf(observer);
-    if (i > -1) {
-      this.observers.splice(i, 1);
-    }
-  };
-  Event.inform = function inform(elemId, data, func) {
-    // Sent to only one observer
-    this.observers[elemId][func](elemId, data);
-  };
-  Event.broadcast = function broadcast(func) {
-    // On each object called func
-    const keys = Object.keys(this.observers);
-    for (let i = 0; i < keys.length; i++) {
-      this.observers[keys[i]][func]();
-    }
-  };
-  return Event;
-}
-
-function eventControl(args, e) {
-  // Note: Function has access to this.elem via "this"
-  // "this" being what element the event sandbox is attached to and
-  // it's children.
-  // To know what button was pressed just use console.log(id).
-  // let {arg1, arg2, arg3} = args;
-  const id = getTargetId(e, ["BUTTON"]);
-
-  if (id === "btnClear") {
-    args["subscribers"].broadcast("clear");
-  }
-  if (id === "btnAll") {
-    args["subscribers"].broadcast("add");
-  }
-  // TODO This could be cleaned up abit
-  if (args[id] !== undefined) {
-    args["subscribers"].inform(args[id], args[id], "add");
-    args["subscribers"].inform("clicksTotal", args[id], "add");
-  }
-  // Stop the event from going further up the DOM
-  e.stopPropagation();
-}
-
-function getTargetId(e, tags) {
+function getTargetProp(e, tags, prop) {
   // Returns the target Id of event for allowed tags
   //    Prevents events on the parent
   if (e.target !== e.currentTarget) {
     if (tags.indexOf(e.target.tagName) > -1) {
-      return e.target.id;
+      return e.target[prop];
     }
   }
   e.stopPropagation();

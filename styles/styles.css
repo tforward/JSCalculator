@@ -55,6 +55,15 @@ html {
 #display {
     background-color: #DBE6F1;
     flex: 1 1;
+    position: relative;
+}
+
+#displayNums{
+    font-size: 3em;
+    text-align: right;
+    position: absolute;
+    bottom: 0;
+    right: 0;
 }
 
 #topBtns {
