@@ -12,47 +12,99 @@ myApp.main = function main() {
   sandbox.init(eventSandbox, "click", null);
   sandbox.add(eventController);
 
-  myApp.currentValue = "0";
+  myApp.displayValue = "0";
+  myApp.currentValue = 0;
+  myApp.lastValue = null;
+  myApp.operations = [];
+  myApp.lastOperations = [];
 };
 
 function eventController(args, e) {
   const value = getTargetProp(e, ["BUTTON"], "value");
 
-  const num = parseInt(value, 10);
+  //const num = parseInt(value, 10);
 
-  if (value === "C") {
-    clearCalc();
-  }
-
-  if (Number.isInteger(num)) {
-    determineValue(value);
+  switch (value) {
+    case "C":
+      clearCalc();
+      break;
+    case "+":
+      logOperation(value);
+      break;
+    case "-":
+      logOperation(value);
+      break;
+    case "=":
+      logOperation(value);
+      break;
+    default:
+      determineValue(value);
+      displayValue(value);
+      break;
   }
 
   // Stop the event from going further up the DOM
   e.stopPropagation();
 }
 
+function logOperation(value) {
+  // Only Add Numbers here
+  if (typeof myApp.currentValue === "number") {
+    myApp.operations.push(myApp.currentValue);
+    myApp.lastValue = parseInt(value, 10);
+    displayValue(value);
+  }
+  //  Add Operators as long as last value was number
+  if (typeof myApp.lastValue === "number") {
+    myApp.operations.push(value);
+    myApp.lastValue = null;
+    myApp.lastOperation = value;
+  }
+  console.log(myApp.operations);
+  console.log(myApp.lastOperation);
+}
+
 function determineValue(value) {
+  if (typeof myApp.lastValue === "number") {
+    myApp.currentValue = parseInt(myApp.lastValue + value, 10);
+    console.log(myApp.currentValue);
+  } else {
+    myApp.currentValue = parseInt(value, 10);
+    myApp.lastValue = parseInt(value, 10);
+  }
+}
+
+function displayValue(value) {
   if (value !== "undefined") {
-    if (myApp.currentValue !== "0") {
-      const newValue = myApp.currentValue + value;
-      myApp.currentValue = newValue;
+    if (myApp.displayValue !== "0") {
+      const newValue = myApp.displayValue + value;
+      myApp.displayValue = newValue;
     } else {
-      myApp.currentValue = value;
+      myApp.displayValue = value;
     }
-    calcDisplay(myApp.currentValue);
+    calcDisplay(myApp.displayValue);
   }
 }
 
 function clearCalc() {
+  myApp.currentValue = 0;
+  myApp.displayValue = "0";
+  myApp.lastOperations.push(myApp.operations);
+  console.log("Clear")
+  myApp.operations = [];
+  console.log(myApp.operations)
   calcDisplay("0");
-  myApp.currentValue = "0";
 }
 
 function calcDisplay(valve) {
   const display = document.getElementById("displayNums");
   display.innerText = valve;
 }
+
+
+// =====================================================================
+// Event Handling
+// =====================================================================
 
 function EventDelegator() {
   const Event = Object.create(createEvent());
