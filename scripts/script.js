@@ -21,8 +21,7 @@ myApp.main = function main() {
 
 function eventController(args, e) {
   const value = getTargetProp(e, ["BUTTON"], "value");
-
-  //const num = parseInt(value, 10);
+  // const num = parseInt(value, 10);
 
   switch (value) {
     case "C":
@@ -34,8 +33,15 @@ function eventController(args, e) {
     case "-":
       logOperation(value);
       break;
+    case "*":
+      logOperation(value);
+      break;
+    case "/":
+      logOperation(value);
+      break;
     case "=":
       logOperation(value);
+      performCalc(myApp.operations);
       break;
     default:
       determineValue(value);
@@ -48,13 +54,14 @@ function eventController(args, e) {
 }
 
 function logOperation(value) {
+  console.log(value);
   // Only Add Numbers here
   if (typeof myApp.currentValue === "number") {
     myApp.operations.push(myApp.currentValue);
     myApp.lastValue = parseInt(value, 10);
     displayValue(value);
   }
-  //  Add Operators as long as last value was number
+  //  Add Operators as strings if last value was number
   if (typeof myApp.lastValue === "number") {
     myApp.operations.push(value);
     myApp.lastValue = null;
@@ -86,19 +93,89 @@ function displayValue(value) {
   }
 }
 
+function clearDisplay() {
+  myApp.displayValue = "0";
+  calcDisplay("0");
+}
+
 function clearCalc() {
   myApp.currentValue = 0;
-  myApp.displayValue = "0";
+  myApp.lastValue = 0;
   myApp.lastOperations.push(myApp.operations);
-  console.log("Clear")
   myApp.operations = [];
-  console.log(myApp.operations)
-  calcDisplay("0");
+  clearDisplay();
 }
 
 function calcDisplay(valve) {
   const display = document.getElementById("displayNums");
   display.innerText = valve;
+}
+
+// =====================================================================
+// Calculations
+// =====================================================================
+
+function operation(operator, calc) {
+  const index = calc.indexOf(operator);
+  if (operator === "/") {
+    const result = calc[index - 1] / calc[index + 1];
+    return [result, index];
+  } else
+  if (operator === "*") {
+    const result = calc[index - 1] * calc[index + 1];
+    return [result, index];
+  } else
+  if (operator === "+") {
+    const result = calc[index - 1] + calc[index + 1];
+    return [result, index];
+  } else
+  if (operator === "-") {
+    const result = calc[index - 1] - calc[index + 1];
+    return [result, index];
+  }
+  return null;
+}
+
+function getOrderofOperations(calc) {
+  // Get the operators used
+  const operators = calc.filter(i => (typeof (i) === "string"));
+  const lastOperations = [];
+  let operator = null;
+  let orderOfOperations = [];
+
+  for (let i = 0; i < operators.length; i++) {
+    operator = operators[i];
+
+    if (operator === "+" || operator === "-") {
+      lastOperations.push(operator);
+    } else {
+      orderOfOperations.push(operator);
+    }
+  }
+  orderOfOperations = orderOfOperations.concat(lastOperations);
+  return orderOfOperations;
+}
+
+function calculation(calc, index, result) {
+  // Replace number before and after and the operator with the new result
+  calc.splice(index - 1, 3, result);
+}
+
+function performCalc(data) {
+  const calc = data.filter(i => i !== "=");
+  console.log(calc);
+  const orderOfOperations = getOrderofOperations(calc);
+  for (let i = 0; i < orderOfOperations.length; i++) {
+    const operator = orderOfOperations[i];
+    const results = operation(operator, calc);
+    calculation(calc, results[1], results[0]);
+  }
+  const finalResult = calc[0];
+  console.log(finalResult);
+  clearDisplay();
+  displayValue(finalResult);
+
+  return finalResult;
 }
 
 
@@ -150,6 +227,7 @@ function getTargetProp(e, tags, prop) {
     }
   }
   e.stopPropagation();
+  return null;
 }
 
 myApp.initApplication = function init() {
@@ -166,6 +244,4 @@ document.onreadystatechange = function onreadystatechange() {
 };
 
 // ======================================================================
-
-
-/// https://philipwalton.github.io/solved-by-flexbox/demos/grids/}
+// https://philipwalton.github.io/solved-by-flexbox/demos/grids/}
