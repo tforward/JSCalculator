@@ -20,42 +20,70 @@ myApp.main = function main() {
 };
 
 function eventController(args, e) {
-  const value = getTargetProp(e, ["BUTTON"], "value");
+  const btnEvent = getTarget(e, ["BUTTON"]);
   // const num = parseInt(value, 10);
+  console.log(btnEvent.id);
 
-  switch (value) {
-    case "C":
-      clearCalc();
-      break;
-    case "+":
-      logOperation(value);
-      break;
-    case "-":
-      logOperation(value);
-      break;
-    case "*":
-      logOperation(value);
-      break;
-    case "/":
-      logOperation(value);
-      break;
-    case "=":
-      logOperation(value);
-      performCalc(myApp.operations);
-      break;
-    default:
-      determineValue(value);
-      displayValue(value);
-      break;
-  }
+  // IM here fixing how this shit works
 
+  // switch (value) {
+  //   case "C":
+  //     clearCalc();
+  //     break;
+  //   case "=":
+  //     performCalc(myApp.operations);
+  //     break;
+  //   // Run on only Numbers
+  //   default:
+  //     runOperation(value);
+  //     break;
+  // }
   // Stop the event from going further up the DOM
   e.stopPropagation();
 }
 
+function runOperation(value) {
+  const valueType = determineValue(value);
+  console.log(valueType);
+  //determineValue(value);
+  //displayValue(value);
+}
+
+function determineValue(value) {
+  let valueType = null;
+  if (typeof value === "number") {
+    valueType = "number";
+  } else if (typeof value === "string") {
+    valueType = "string";
+  }
+  return valueType;
+}
+
+
+function addDecimal(value) {
+  // If decimal was already pressed
+  if (myApp.lastOperation !== ".") {
+    myApp.lastOperation = ".";
+    displayValue(value);
+  }
+}
+
+function logOperator(value) {
+
+  //  Add Operators as strings if last value was number
+  if (typeof value === "string") {
+    myApp.operations.push(value);
+    myApp.lastValue = null;
+    myApp.lastOperation = value;
+  }
+  console.log(myApp.operations);
+  console.log(myApp.lastOperation);
+}
+
+
 function logOperation(value) {
-  console.log(value);
-  // Only Add Numbers here
+  console.log(myApp.currentValue);
+  // Add Numbers here
   if (typeof myApp.currentValue === "number") {
     myApp.operations.push(myApp.currentValue);
     myApp.lastValue = parseInt(value, 10);
@@ -71,10 +99,23 @@ function logOperation(value) {
   console.log(myApp.lastOperation);
 }
 
-function determineValue(value) {
+function determineValue2(value) {
   if (typeof myApp.lastValue === "number") {
-    myApp.currentValue = parseInt(myApp.lastValue + value, 10);
     console.log(myApp.currentValue);
+    console.log(myApp.lastOperation);
+    // if (myApp.lastOperation === ".") {
+    //   const last = myApp.lastValue.toString();
+    //   const decimalNum = value.toString();
+    //   const newValue = last + "." + decimalNum
+    //   console.log("NEW", newValue);
+    //   const newNum = parseInt(newValue)
+    //   myApp.operations.push(newNum);
+    // }
+    if (myApp.lastOperation !== ".") {
+      console.log("else", myApp.lastOperation )
+      console.log("else", myApp.currentValue )
+      myApp.currentValue = parseInt(myApp.lastValue + value, 10);
+    }
   } else {
     myApp.currentValue = parseInt(value, 10);
     myApp.lastValue = parseInt(value, 10);
@@ -218,12 +259,12 @@ function createEvent() {
   return CreateEvent;
 }
 
-function getTargetProp(e, tags, prop) {
-  // Returns the target Id of event for allowed tags
-  //    Prevents events on the parent
+function getTarget(e, tags) {
+  // Returns the target of event triggered, for allowed tags
+  //    Prevents events going up the parent
   if (e.target !== e.currentTarget) {
     if (tags.indexOf(e.target.tagName) > -1) {
-      return e.target[prop];
+      return e.target;
     }
   }
   e.stopPropagation();
