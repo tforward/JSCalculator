@@ -13,52 +13,115 @@ myApp.main = function main() {
   sandbox.add(eventController);
 
   myApp.displayValue = "0";
-  myApp.currentValue = 0;
+  myApp.currentValue = null;
   myApp.lastValue = null;
+  myApp.values = [];
   myApp.operations = [];
   myApp.lastOperations = [];
+  myApp.decimal = false;
 };
 
 function eventController(args, e) {
   const btnEvent = getTarget(e, ["BUTTON"]);
   // const num = parseInt(value, 10);
-  console.log(btnEvent.id);
 
-  // IM here fixing how this shit works
+  const btnId = btnEvent.id;
 
-  // switch (value) {
-  //   case "C":
-  //     clearCalc();
-  //     break;
-  //   case "=":
-  //     performCalc(myApp.operations);
-  //     break;
-  //   // Run on only Numbers
-  //   default:
-  //     runOperation(value);
-  //     break;
-  // }
+  switch (btnId) {
+    case "clear":
+      clearCalc();
+      break;
+    case "equals":
+      performCalc(myApp.operations);
+      break;
+    // Run on only Numbers
+    default:
+      runOperation(btnId);
+      break;
+  }
   // Stop the event from going further up the DOM
   e.stopPropagation();
 }
 
-function runOperation(value) {
-  const valueType = determineValue(value);
-  console.log(valueType);
-  //determineValue(value);
-  //displayValue(value);
+function runOperation(btnId) {
+  const value = determineValue(btnId);
+  const isOperator = determineOperator(value);
+
+  logValue(value, isOperator);
+  calcDisplay(myApp.currentValue);
 }
+
+function determineOperator(value) {
+  const operators = ["+", "-", "x", "\\"];
+  if (operators.indexOf(value) !== -1) {
+    return true;
+  }
+  return false;
+}
+
+
+function logValue(value, isOperator) {
+  // On init only one zero can be entered
+  if (value === "0" && myApp.lastValue === null) {
+    myApp.currentValue = value;
+  // Handle for Decimal Place
+  } else if (value === ".") {
+    handleDecimal(value);
+  // On init
+  } else if (isOperator === false && myApp.lastValue === null) {
+    myApp.currentValue = value;
+    myApp.lastValue = value;
+  } else if (isOperator === true && myApp.lastValue === null) {
+    myApp.currentValue = `0${value}`;
+    myApp.lastValue = value;
+  // After init
+  } else {
+    myApp.currentValue += value;
+    myApp.lastValue = value;
+  }
+  console.log(myApp.currentValue);
+}
+
+function handleDecimal(value) {
+  const lastValueOperator = determineOperator(myApp.lastValue);
+  if (myApp.decimal === false) {
+    // On Init
+    if (myApp.lastValue === null) {
+      myApp.currentValue = "0.";
+      myApp.lastValue = "0.";
+    } else if (lastValueOperator === false) {
+      myApp.currentValue += value;
+      myApp.lastValue = value;
+      // If the last value was an operator
+    } else {
+      myApp.currentValue += `0${value}`;
+      myApp.lastValue = `0${value}`;
+    }
+  }
+  myApp.decimal = true;
+}
+
 
 function determineValue(value) {
-  let valueType = null;
-  if (typeof value === "number") {
-    valueType = "number";
-  } else if (typeof value === "string") {
-    valueType = "string";
-  }
-  return valueType;
+  const btnMap = {
+    one: "1",
+    two: "2",
+    three: "3",
+    four: "4",
+    five: "5",
+    six: "6",
+    seven: "7",
+    eight: "8",
+    nine: "9",
+    zero: "0",
+    add: "+",
+    subtract: "-",
+    multiply: "x",
+    divide: "\\",
+    decimal: ".",
+  };
+  return btnMap[value];
 }
-
 
 function addDecimal(value) {
   // If decimal was already pressed
@@ -122,26 +185,15 @@ function determineValue2(value) {
   }
 }
 
-function displayValue(value) {
-  if (value !== "undefined") {
-    if (myApp.displayValue !== "0") {
-      const newValue = myApp.displayValue + value;
-      myApp.displayValue = newValue;
-    } else {
-      myApp.displayValue = value;
-    }
-    calcDisplay(myApp.displayValue);
-  }
-}
-
 function clearDisplay() {
   myApp.displayValue = "0";
   calcDisplay("0");
 }
 
 function clearCalc() {
-  myApp.currentValue = 0;
-  myApp.lastValue = 0;
+  myApp.currentValue = null;
+  myApp.lastValue = null;
+  myApp.decimal = false;
   myApp.lastOperations.push(myApp.operations);
   myApp.operations = [];
   clearDisplay();
