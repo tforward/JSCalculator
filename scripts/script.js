@@ -13,7 +13,7 @@ myApp.main = function main() {
   sandbox.add(eventController);
 
   myApp.displayValue = "0";
-  myApp.currentValue = null;
+  myApp.currentValue = "0";
   myApp.lastValue = null;
   myApp.values = [];
   myApp.operations = [];
@@ -26,13 +26,15 @@ function eventController(args, e) {
   // const num = parseInt(value, 10);
 
   const btnId = btnEvent.id;
+  let parsedCalc = [];
 
   switch (btnId) {
     case "clear":
       clearCalc();
       break;
     case "equals":
-      performCalc(myApp.operations);
+      parsedCalc = parseCalculation();
+      performCalc(parsedCalc);
       break;
     // Run on only Numbers
     default:
@@ -51,14 +53,24 @@ function runOperation(btnId) {
   calcDisplay(myApp.currentValue);
 }
 
+function parseCalculation() {
+  // Handle for any muliply
+  const calcString = myApp.currentValue.replace(/x/g, "*");
+  const operatorsArry = calcString.split(/[^+-/*]/).filter(value => value !== "");
+
+  // Looks for operators and add commas around them, so can split on it
+  const calcComma = calcString.replace(/[+-/*]/g, i => `,${i},`);
+  const formula = calcComma.split(",");
+  return [formula, operatorsArry];
+}
+
 function determineOperator(value) {
-  const operators = ["+", "-", "x", "\\"];
+  const operators = ["+", "-", "x", "/"];
   if (operators.indexOf(value) !== -1) {
     return true;
   }
   return false;
 }
-
 
 function logValue(value, isOperator) {
   // On init only one zero can be entered
@@ -67,19 +79,31 @@ function logValue(value, isOperator) {
   // Handle for Decimal Place
   } else if (value === ".") {
     handleDecimal(value);
-  // On init
+  // Handle for Operators
+  } else if (determineOperator(value) === true) {
+    handleOperator(value);
   } else if (isOperator === false && myApp.lastValue === null) {
     myApp.currentValue = value;
     myApp.lastValue = value;
-  } else if (isOperator === true && myApp.lastValue === null) {
-    myApp.currentValue = `0${value}`;
-    myApp.lastValue = value;
+  } else {
   // After init
+    myApp.currentValue += value;
+    myApp.lastValue = value;
+  }
+}
+
+function handleOperator(value) {
+  // Replaces the last operator with new one
+  if (determineOperator(myApp.lastValue) === true) {
+    myApp.currentValue = myApp.currentValue.slice(0, -1);
+    myApp.currentValue += value;
+    myApp.lastValue = value;
   } else {
     myApp.currentValue += value;
     myApp.lastValue = value;
   }
-  console.log(myApp.currentValue);
+  // Allows decimal to be enter on next set of numbers
+  myApp.decimal = false;
 }
 
 function handleDecimal(value) {
@@ -101,7 +125,6 @@ function handleDecimal(value) {
   myApp.decimal = true;
 }
 
-
 function determineValue(value) {
   const btnMap = {
     one: "1",
@@ -117,72 +140,10 @@ function determineValue(value) {
     add: "+",
     subtract: "-",
     multiply: "x",
-    divide: "\\",
+    divide: "/",
     decimal: ".",
   };
   return btnMap[value];
-}
-
-function addDecimal(value) {
-  // If decimal was already pressed
-  if (myApp.lastOperation !== ".") {
-    myApp.lastOperation = ".";
-    displayValue(value);
-  }
-}
-
-function logOperator(value) {
-
-  //  Add Operators as strings if last value was number
-  if (typeof value === "string") {
-    myApp.operations.push(value);
-    myApp.lastValue = null;
-    myApp.lastOperation = value;
-  }
-  console.log(myApp.operations);
-  console.log(myApp.lastOperation);
-}
-
-
-function logOperation(value) {
-  console.log(myApp.currentValue);
-  // Add Numbers here
-  if (typeof myApp.currentValue === "number") {
-    myApp.operations.push(myApp.currentValue);
-    myApp.lastValue = parseInt(value, 10);
-    displayValue(value);
-  }
-  //  Add Operators as strings if last value was number
-  if (typeof myApp.lastValue === "number") {
-    myApp.operations.push(value);
-    myApp.lastValue = null;
-    myApp.lastOperation = value;
-  }
-  console.log(myApp.operations);
-  console.log(myApp.lastOperation);
-}
-
-function determineValue2(value) {
-  if (typeof myApp.lastValue === "number") {
-    console.log(myApp.currentValue);
-    console.log(myApp.lastOperation);
-    // if (myApp.lastOperation === ".") {
-    //   const last = myApp.lastValue.toString();
-    //   const decimalNum = value.toString();
-    //   const newValue = last + "." + decimalNum
-    //   console.log("NEW", newValue);
-    //   const newNum = parseInt(newValue)
-    //   myApp.operations.push(newNum);
-    // }
-    if (myApp.lastOperation !== ".") {
-      console.log("else", myApp.lastOperation )
-      console.log("else", myApp.currentValue )
-      myApp.currentValue = parseInt(myApp.lastValue + value, 10);
-    }
-  } else {
-    myApp.currentValue = parseInt(value, 10);
-    myApp.lastValue = parseInt(value, 10);
-  }
 }
 
 function clearDisplay() {
@@ -191,7 +152,7 @@ function clearDisplay() {
 }
 
 function clearCalc() {
-  myApp.currentValue = null;
+  myApp.currentValue = "0";
   myApp.lastValue = null;
   myApp.decimal = false;
   myApp.lastOperations.push(myApp.operations);
@@ -229,9 +190,8 @@ function operation(operator, calc) {
   return null;
 }
 
-function getOrderofOperations(calc) {
+function getOrderofOperations(operators) {
   // Get the operators used
-  const operators = calc.filter(i => (typeof (i) === "string"));
   const lastOperations = [];
   let operator = null;
   let orderOfOperations = [];
@@ -255,9 +215,10 @@ function calculation(calc, index, result) {
 }
 
 function performCalc(data) {
-  const calc = data.filter(i => i !== "=");
+  const calc = data[0];
+  const operators = data[1];
   console.log(calc);
-  const orderOfOperations = getOrderofOperations(calc);
+  const orderOfOperations = getOrderofOperations(operators);
   for (let i = 0; i < orderOfOperations.length; i++) {
     const operator = orderOfOperations[i];
     const results = operation(operator, calc);
@@ -266,7 +227,7 @@ function performCalc(data) {
   const finalResult = calc[0];
   console.log(finalResult);
   clearDisplay();
-  displayValue(finalResult);
+  calcDisplay(finalResult);
 
   return finalResult;
 }
