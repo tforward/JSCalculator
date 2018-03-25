@@ -23,7 +23,10 @@ myApp.main = function main() {
 
 function eventController(args, e) {
   const btnEvent = getTarget(e, ["BUTTON"]);
-  // const num = parseInt(value, 10);
+
+  if (btnEvent === null) {
+    return null;
+  }
 
   const btnId = btnEvent.id;
   let parsedCalc = [];
@@ -55,11 +58,12 @@ function runOperation(btnId) {
 
 function parseCalculation() {
   // Handle for any muliply
-  const calcString = myApp.currentValue.replace(/x/g, "*");
-  const operatorsArry = calcString.split(/[^+-/*]/).filter(value => value !== "");
+  let calcString = myApp.currentValue;
+  calcString = handleOpenDecimal(calcString);
+  const operatorsArry = calcString.split(/[^+\-\/x]/).filter(value => value !== "");
 
   // Looks for operators and add commas around them, so can split on it
-  const calcComma = calcString.replace(/[+-/*]/g, i => `,${i},`);
+  const calcComma = calcString.replace(/[+\-\/x]/g, i => `,${i},`);
   const formula = calcComma.split(",");
   return [formula, operatorsArry];
 }
@@ -70,6 +74,15 @@ function determineOperator(value) {
     return true;
   }
   return false;
+}
+
+function handleOpenDecimal(stringVal) {
+  // Handle if deciaml was pressed but not follow-up number entered
+  const lastChar = stringVal[stringVal.length - 1];
+  if (lastChar === ".") {
+    stringVal += "0";
+  }
+  return stringVal;
 }
 
 function logValue(value, isOperator) {
@@ -172,19 +185,19 @@ function calcDisplay(valve) {
 function operation(operator, calc) {
   const index = calc.indexOf(operator);
   if (operator === "/") {
-    const result = calc[index - 1] / calc[index + 1];
+    const result = parseFloat(calc[index - 1]) / parseFloat(calc[index + 1]);
     return [result, index];
   } else
-  if (operator === "*") {
-    const result = calc[index - 1] * calc[index + 1];
+  if (operator === "x") {
+    const result = parseFloat(calc[index - 1]) * parseFloat(calc[index + 1]);
     return [result, index];
   } else
   if (operator === "+") {
-    const result = calc[index - 1] + calc[index + 1];
+    const result = parseFloat(calc[index - 1]) + parseFloat(calc[index + 1]);
     return [result, index];
   } else
   if (operator === "-") {
-    const result = calc[index - 1] - calc[index + 1];
+    const result = parseFloat(calc[index - 1]) - parseFloat(calc[index + 1]);
     return [result, index];
   }
   return null;
@@ -217,7 +230,6 @@ function calculation(calc, index, result) {
 function performCalc(data) {
   const calc = data[0];
   const operators = data[1];
-  console.log(calc);
   const orderOfOperations = getOrderofOperations(operators);
   for (let i = 0; i < orderOfOperations.length; i++) {
     const operator = orderOfOperations[i];
@@ -225,13 +237,13 @@ function performCalc(data) {
     calculation(calc, results[1], results[0]);
   }
   const finalResult = calc[0];
-  console.log(finalResult);
   clearDisplay();
   calcDisplay(finalResult);
+  // Sets the final result to current so can continue calc
+  myApp.currentValue = finalResult;
 
   return finalResult;
 }
-
 
 // =====================================================================
 // Event Handling
