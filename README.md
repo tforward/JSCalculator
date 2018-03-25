@@ -1,2 +1,2 @@
 # JSCalculator
-JavaScript Calculator
+[JavaScript Calculator](https://tforward.github.io/JSCalculator/)
