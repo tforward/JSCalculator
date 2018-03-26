@@ -49,6 +49,7 @@ html {
     display: flex;
     flex-flow: column;
     width: 100%;
+    justify-content: space-around;
 }
 
 #display {
@@ -73,6 +74,7 @@ html {
     background-color: #d0d0d0  ;
     flex: 1 1;
     min-width: 23em;
+    
 }
 
 /* Digit Buttons */
@@ -80,10 +82,11 @@ html {
 .btnRow {
     display: flex;
     flex-direction: row;
+    justify-content: space-around;
 }
 
 .btnCalc {
-    flex: 1 1 auto;
+    flex: 1 0 auto;
     background-color: #d8eef8;
     color: black;
     text-decoration: none;
@@ -106,7 +109,7 @@ html {
 }
 
 .btnBig {
-    flex: 10 1 auto;
+    flex: 2 0 12.5vh;
 }
 
 .operator {
